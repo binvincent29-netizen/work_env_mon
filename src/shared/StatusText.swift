@@ -71,9 +71,9 @@ enum StatusText {
     /// 메뉴 바 아이콘 위에 마우스를 올렸을 때 나오는 설명.
     static func tooltip(_ state: BlockState?, now: Date = Date()) -> String {
         guard let state = state else {
-            return "YouTubeGuard · 데몬과 연결되지 않았습니다"
+            return "StreamGuard · 데몬과 연결되지 않았습니다"
         }
-        var lines = ["YouTubeGuard", headline(state, now: now)]
+        var lines = ["StreamGuard", headline(state, now: now)]
         if state.blocking {
             lines.append("막는 중인 주소 \(state.blockedHostCount) 개" + (state.pfApplied ? " · 방화벽 함께 적용" : ""))
         }

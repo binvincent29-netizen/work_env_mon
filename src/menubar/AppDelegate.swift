@@ -13,7 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     /// 메뉴 바에서 아이콘이 앉을 자리를 기억하는 이름.
     /// 이 이름을 주어야 사용자가 Command 키로 옮겨 둔 자리가 다음 실행에도 남는다.
-    private static let autosaveName = "YouTubeGuardStatusItem"
+    private static let autosaveName = "StreamGuardStatusItem"
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -54,10 +54,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         var accessibilityDescription: String {
             switch self {
-            case .unresponsive: return "YouTubeGuard, 데몬 응답 없음"
-            case .disabled: return "YouTubeGuard, 차단 기능 꺼짐"
-            case .blocking: return "YouTubeGuard, 차단 중"
-            case .idle: return "YouTubeGuard, 켜짐, 지금은 허용 시간"
+            case .unresponsive: return "StreamGuard, 데몬 응답 없음"
+            case .disabled: return "StreamGuard, 차단 기능 꺼짐"
+            case .blocking: return "StreamGuard, 차단 중"
+            case .idle: return "StreamGuard, 켜짐, 지금은 허용 시간"
             }
         }
 
@@ -255,7 +255,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         guard Dialogs.confirm(
             title: "지금부터 \(durationLabel(minutes)) 동안 막을까요?",
-            message: "\(StatusText.timeLabel(until)) 까지 YouTube 에 접속할 수 없습니다.\(note)",
+            message: "\(StatusText.timeLabel(until)) 까지 막아 둔 곳에 접속할 수 없습니다.\(note)",
             proceedTitle: "막기") else { return }
 
         apply { config in
@@ -325,7 +325,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func quitApp() {
         guard Dialogs.confirm(
             title: "메뉴 바 아이콘을 닫을까요?",
-            message: "차단 자체는 그대로 이어집니다. 아이콘만 사라집니다.\n다시 보려면 응용 프로그램 폴더의 YouTubeGuard 를 실행하세요.",
+            message: "차단 자체는 그대로 이어집니다. 아이콘만 사라집니다.\n다시 보려면 응용 프로그램 폴더의 StreamGuard 를 실행하세요.",
             proceedTitle: "닫기") else { return }
         NSApp.terminate(nil)
     }

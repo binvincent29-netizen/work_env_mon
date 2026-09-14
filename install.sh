@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# YouTubeGuard 를 설치한다. 관리자 권한이 필요하다.
+# StreamGuard 를 설치한다. 관리자 권한이 필요하다.
 #
 #   ./build.sh          (일반 권한으로 먼저 빌드)
 #   sudo ./install.sh   (설치)
@@ -10,22 +10,22 @@ set -euo pipefail
 cd "$(dirname "$0")"
 SOURCE_DIR="$(pwd)"
 
-DAEMON_LABEL="com.vincent.ytguard.daemon"
-AGENT_LABEL="com.vincent.ytguard.menubar"
+DAEMON_LABEL="io.github.binvincent29-netizen.streamguard.daemon"
+AGENT_LABEL="io.github.binvincent29-netizen.streamguard.menubar"
 
-DAEMON_BIN="/usr/local/libexec/ytguardd"
-APP_DEST="/Applications/YouTubeGuard.app"
-SUPPORT_DIR="/Library/Application Support/YouTubeGuard"
+DAEMON_BIN="/usr/local/libexec/streamguardd"
+APP_DEST="/Applications/StreamGuard.app"
+SUPPORT_DIR="/Library/Application Support/StreamGuard"
 CONFIG_DIR="${SUPPORT_DIR}/user"
 CONFIG_FILE="${CONFIG_DIR}/config.json"
-LOG_DIR="/Library/Logs/YouTubeGuard"
+LOG_DIR="/Library/Logs/StreamGuard"
 
-PF_ANCHOR="/etc/pf.anchors/ytguard"
+PF_ANCHOR="/etc/pf.anchors/streamguard"
 PF_CONF="/etc/pf.conf"
-PF_BEGIN="# >>> YouTubeGuard 앵커 시작 >>>"
-PF_END="# <<< YouTubeGuard 앵커 끝 <<<"
+PF_BEGIN="# >>> StreamGuard 앵커 시작 >>>"
+PF_END="# <<< StreamGuard 앵커 끝 <<<"
 
-HOSTS_BACKUP="/etc/hosts.ytguard-backup"
+HOSTS_BACKUP="/etc/hosts.streamguard-backup"
 
 fail() { echo "오류: $*" >&2; exit 1; }
 
@@ -45,7 +45,7 @@ wait_until_gone() {
 bootstrap_with_retry() {
     local domain="$1"
     local plist="$2"
-    local errfile="/tmp/ytguard-bootstrap-$$.err"
+    local errfile="/tmp/streamguard-bootstrap-$$.err"
     local i
     for i in 1 2 3 4 5; do
         if launchctl bootstrap "$domain" "$plist" 2>"$errfile"; then
@@ -67,8 +67,8 @@ bootstrap_with_retry() {
 REAL_USER="$SUDO_USER"
 REAL_UID="$(id -u "$REAL_USER")"
 
-[ -x "build/ytguardd" ] || fail "build/ytguardd 가 없습니다. 먼저 일반 권한으로 ./build.sh 를 실행해 주세요."
-[ -d "build/YouTubeGuard.app" ] || fail "build/YouTubeGuard.app 이 없습니다. 먼저 ./build.sh 를 실행해 주세요."
+[ -x "build/streamguardd" ] || fail "build/streamguardd 가 없습니다. 먼저 일반 권한으로 ./build.sh 를 실행해 주세요."
+[ -d "build/StreamGuard.app" ] || fail "build/StreamGuard.app 이 없습니다. 먼저 ./build.sh 를 실행해 주세요."
 
 echo "==> 설치를 시작합니다. 대상 사용자: ${REAL_USER}"
 
@@ -106,11 +106,11 @@ fi
 
 echo "==> 데몬을 놓습니다: ${DAEMON_BIN}"
 mkdir -p "$(dirname "$DAEMON_BIN")"
-install -m 755 -o root -g wheel build/ytguardd "$DAEMON_BIN"
+install -m 755 -o root -g wheel build/streamguardd "$DAEMON_BIN"
 
 echo "==> 메뉴 바 앱을 놓습니다: ${APP_DEST}"
 rm -rf "$APP_DEST"
-cp -R build/YouTubeGuard.app "$APP_DEST"
+cp -R build/StreamGuard.app "$APP_DEST"
 chown -R root:wheel "$APP_DEST"
 
 echo "==> 폴더와 설정 파일을 준비합니다"
@@ -153,32 +153,32 @@ chmod 664 "$CONFIG_FILE"
 
 echo "==> 방화벽 앵커를 준비합니다"
 mkdir -p /etc/pf.anchors
-install -m 644 -o root -g wheel pf/ytguard.anchor "$PF_ANCHOR"
+install -m 644 -o root -g wheel pf/streamguard.anchor "$PF_ANCHOR"
 
 if grep -qF "$PF_BEGIN" "$PF_CONF"; then
     echo "    ${PF_CONF} 에 이미 등록되어 있습니다"
 else
-    cp "$PF_CONF" "${PF_CONF}.ytguard-backup"
+    cp "$PF_CONF" "${PF_CONF}.streamguard-backup"
     {
         echo ""
         echo "$PF_BEGIN"
-        echo "anchor \"ytguard\""
-        echo "load anchor \"ytguard\" from \"${PF_ANCHOR}\""
+        echo "anchor \"streamguard\""
+        echo "load anchor \"streamguard\" from \"${PF_ANCHOR}\""
         echo "$PF_END"
     } >> "$PF_CONF"
 
     # 문법이 어긋나면 원래대로 되돌린다. pf 설정이 깨지면 다른 기능까지 말썽이 난다.
     if pfctl -n -f "$PF_CONF" >/dev/null 2>&1; then
-        echo "    ${PF_CONF} 에 앵커를 등록했습니다 (백업: ${PF_CONF}.ytguard-backup)"
+        echo "    ${PF_CONF} 에 앵커를 등록했습니다 (백업: ${PF_CONF}.streamguard-backup)"
     else
-        cp "${PF_CONF}.ytguard-backup" "$PF_CONF"
+        cp "${PF_CONF}.streamguard-backup" "$PF_CONF"
         echo "    경고: 앵커 등록이 문법 검사를 통과하지 못해 되돌렸습니다."
         echo "          방화벽 차단 기능은 쓸 수 없지만 나머지는 정상 동작합니다."
     fi
 fi
 
 # 앵커는 표가 비어 있으면 아무것도 막지 않는다. 지금은 비어 있는 상태로 올려 둔다.
-pfctl -a ytguard -f "$PF_ANCHOR" >/dev/null 2>&1 || true
+pfctl -a streamguard -f "$PF_ANCHOR" >/dev/null 2>&1 || true
 
 # ---------------------------------------------------------------- launchd 등록
 
@@ -198,7 +198,7 @@ if bootstrap_with_retry "gui/${REAL_UID}" "/Library/LaunchAgents/${AGENT_LABEL}.
     echo "    메뉴 바 앱을 띄웠습니다"
 else
     echo "    경고: 메뉴 바 앱을 등록하지 못했습니다."
-    echo "          차단은 정상 동작합니다. 응용 프로그램 폴더의 YouTubeGuard 를 직접 실행해 보세요."
+    echo "          차단은 정상 동작합니다. 응용 프로그램 폴더의 StreamGuard 를 직접 실행해 보세요."
 fi
 
 # ---------------------------------------------------------------- 마무리
@@ -215,9 +215,9 @@ else
 fi
 
 echo
-if pgrep -f "/Applications/YouTubeGuard.app" >/dev/null 2>&1; then
+if pgrep -f "/Applications/StreamGuard.app" >/dev/null 2>&1; then
     echo "메뉴 바 앱이 돌고 있습니다. 메뉴 바의 방패 아이콘으로 상태를 볼 수 있습니다."
 else
-    echo "메뉴 바 앱이 보이지 않습니다. 응용 프로그램 폴더의 YouTubeGuard 를 실행해 주세요."
+    echo "메뉴 바 앱이 보이지 않습니다. 응용 프로그램 폴더의 StreamGuard 를 실행해 주세요."
 fi
 echo "지우려면 sudo ./uninstall.sh 를 실행하세요."

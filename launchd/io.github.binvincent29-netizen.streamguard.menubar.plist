@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.vincent.ytguard.menubar</string>
+    <string>io.github.binvincent29-netizen.streamguard.menubar</string>
 
     <key>ProgramArguments</key>
     <array>
-        <string>/Applications/YouTubeGuard.app/Contents/MacOS/YouTubeGuard</string>
+        <string>/Applications/StreamGuard.app/Contents/MacOS/StreamGuard</string>
     </array>
 
     <!-- 로그인할 때 한 번 띄운다.

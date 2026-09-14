@@ -1,25 +1,25 @@
 #!/bin/bash
 #
-# YouTubeGuard 를 지운다. 관리자 권한이 필요하다.
+# StreamGuard 를 지운다. 관리자 권한이 필요하다.
 #
 #   sudo ./uninstall.sh
 #
 set -euo pipefail
 
-DAEMON_LABEL="com.vincent.ytguard.daemon"
-AGENT_LABEL="com.vincent.ytguard.menubar"
+DAEMON_LABEL="io.github.binvincent29-netizen.streamguard.daemon"
+AGENT_LABEL="io.github.binvincent29-netizen.streamguard.menubar"
 
-DAEMON_BIN="/usr/local/libexec/ytguardd"
-APP_DEST="/Applications/YouTubeGuard.app"
-SUPPORT_DIR="/Library/Application Support/YouTubeGuard"
-LOG_DIR="/Library/Logs/YouTubeGuard"
+DAEMON_BIN="/usr/local/libexec/streamguardd"
+APP_DEST="/Applications/StreamGuard.app"
+SUPPORT_DIR="/Library/Application Support/StreamGuard"
+LOG_DIR="/Library/Logs/StreamGuard"
 
-PF_ANCHOR="/etc/pf.anchors/ytguard"
+PF_ANCHOR="/etc/pf.anchors/streamguard"
 PF_CONF="/etc/pf.conf"
-PF_BEGIN="# >>> YouTubeGuard 앵커 시작 >>>"
-PF_END="# <<< YouTubeGuard 앵커 끝 <<<"
+PF_BEGIN="# >>> StreamGuard 앵커 시작 >>>"
+PF_END="# <<< StreamGuard 앵커 끝 <<<"
 
-HOSTS_BACKUP="/etc/hosts.ytguard-backup"
+HOSTS_BACKUP="/etc/hosts.streamguard-backup"
 
 fail() { echo "오류: $*" >&2; exit 1; }
 
@@ -43,8 +43,8 @@ else
 fi
 
 echo "==> 방화벽 앵커를 걷어 냅니다"
-pfctl -a ytguard -t ytguard -T flush >/dev/null 2>&1 || true
-pfctl -a ytguard -F rules >/dev/null 2>&1 || true
+pfctl -a streamguard -t streamguard -T flush >/dev/null 2>&1 || true
+pfctl -a streamguard -F rules >/dev/null 2>&1 || true
 
 if grep -qF "$PF_BEGIN" "$PF_CONF" 2>/dev/null; then
     # 표시선 사이의 줄만 지운다. 다른 설정은 건드리지 않는다.
@@ -52,15 +52,15 @@ if grep -qF "$PF_BEGIN" "$PF_CONF" 2>/dev/null; then
         $0 == b { skip = 1; next }
         $0 == e { skip = 0; next }
         !skip   { print }
-    ' "$PF_CONF" > /tmp/pf.conf.ytguard.$$
+    ' "$PF_CONF" > /tmp/pf.conf.streamguard.$$
 
-    if pfctl -n -f /tmp/pf.conf.ytguard.$$ >/dev/null 2>&1; then
-        cat /tmp/pf.conf.ytguard.$$ > "$PF_CONF"
+    if pfctl -n -f /tmp/pf.conf.streamguard.$$ >/dev/null 2>&1; then
+        cat /tmp/pf.conf.streamguard.$$ > "$PF_CONF"
         echo "    ${PF_CONF} 에서 앵커 등록을 지웠습니다"
     else
         echo "    경고: 지운 뒤의 ${PF_CONF} 가 문법 검사를 통과하지 못해 그대로 두었습니다."
     fi
-    rm -f /tmp/pf.conf.ytguard.$$
+    rm -f /tmp/pf.conf.streamguard.$$
 fi
 rm -f "$PF_ANCHOR"
 
@@ -78,6 +78,6 @@ if [ -f "$HOSTS_BACKUP" ]; then
     echo "설치 전 hosts 백업은 그대로 남겨 두었습니다: ${HOSTS_BACKUP}"
     echo "필요 없으면 sudo rm ${HOSTS_BACKUP} 로 지우세요."
 fi
-if [ -f "${PF_CONF}.ytguard-backup" ]; then
-    echo "설치 전 pf 설정 백업: ${PF_CONF}.ytguard-backup"
+if [ -f "${PF_CONF}.streamguard-backup" ]; then
+    echo "설치 전 pf 설정 백업: ${PF_CONF}.streamguard-backup"
 fi

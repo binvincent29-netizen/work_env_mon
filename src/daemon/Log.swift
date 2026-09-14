@@ -4,7 +4,7 @@ import Foundation
 final class Log {
     static let shared = Log()
 
-    private let queue = DispatchQueue(label: "com.vincent.ytguard.log")
+    private let queue = DispatchQueue(label: "io.github.binvincent29-netizen.streamguard.log")
     private let maxBytes = 512 * 1024
     private let formatter: DateFormatter
 

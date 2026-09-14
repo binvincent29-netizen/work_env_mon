@@ -4,9 +4,9 @@ import Foundation
 /// 사용자가 직접 적어 둔 다른 줄은 건드리지 않는다.
 enum HostsFile {
 
-    static let beginMarker = "# >>> YouTubeGuard 차단 구간 시작 >>>"
-    static let endMarker = "# <<< YouTubeGuard 차단 구간 끝 <<<"
-    static let notice = "# 이 구간은 YouTubeGuard 가 자동으로 관리합니다. 직접 고치지 마세요."
+    static let beginMarker = "# >>> StreamGuard 차단 구간 시작 >>>"
+    static let endMarker = "# <<< StreamGuard 차단 구간 끝 <<<"
+    static let notice = "# 이 구간은 StreamGuard 가 자동으로 관리합니다. 직접 고치지 마세요."
 
     enum HostsError: Error, LocalizedError {
         case writeFailed(String)
@@ -75,7 +75,7 @@ enum HostsFile {
 
     /// 임시 파일에 쓰고 제자리로 옮긴다. 중간에 멈춰도 hosts 파일이 깨지지 않는다.
     private static func write(_ text: String) throws {
-        let tempPath = "/etc/.hosts.ytguard.\(getpid())"
+        let tempPath = "/etc/.hosts.streamguard.\(getpid())"
         let tempURL = URL(fileURLWithPath: tempPath)
 
         do {

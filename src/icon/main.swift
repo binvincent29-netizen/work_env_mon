@@ -29,7 +29,7 @@ func writePNG(_ image: CGImage, to path: String) -> Bool {
 
 let arguments = Array(CommandLine.arguments.dropFirst())
 guard let outputDirectory = arguments.first else {
-    FileHandle.standardError.write(Data("쓸 폴더를 알려 주세요. 예: ytguard-makeicon build/AppIcon.iconset\n".utf8))
+    FileHandle.standardError.write(Data("쓸 폴더를 알려 주세요. 예: streamguard-makeicon build/AppIcon.iconset\n".utf8))
     exit(2)
 }
 

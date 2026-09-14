@@ -121,7 +121,7 @@ final class Daemon {
 
         if shouldBlock {
             if !pfBlocking || now.timeIntervalSince(lastPFRefresh) > pfRefreshInterval {
-                // YouTube 주소는 자주 바뀌므로 차단을 시작할 때와 30 분마다 다시 조회한다.
+                // 막을 주소는 자주 바뀌므로 차단을 시작할 때와 30 분마다 다시 조회한다.
                 pfAddressCount = PacketFilter.block(targets: Blocklist.packetFilterTargets(config: config))
                 lastPFRefresh = now
                 pfBlocking = pfAddressCount > 0
@@ -167,7 +167,7 @@ final class Daemon {
         }
 
         // 데몬을 멈춰서 차단이 풀리면 안 되므로 hosts 구간은 그대로 둔다.
-        // 완전히 지우려면 ytguardd --clear 를 쓴다.
+        // 완전히 지우려면 streamguardd --clear 를 쓴다.
         PacketFilter.releaseEnableToken()
         log("데몬을 멈췄습니다. 차단 구간은 그대로 둡니다.")
     }
@@ -219,11 +219,11 @@ func printStatus() {
 
 func printUsage() {
     print("""
-    ytguardd — YouTubeGuard 차단 데몬 (루트 권한 필요)
+    streamguardd — StreamGuard 차단 데몬 (루트 권한 필요)
 
-      ytguardd            데몬으로 계속 실행합니다. launchd 가 이 방식으로 띄웁니다.
-      ytguardd --clear    hosts 파일의 차단 구간과 방화벽 차단을 모두 지웁니다.
-      ytguardd --status   지금 상태를 보여 줍니다.
+      streamguardd            데몬으로 계속 실행합니다. launchd 가 이 방식으로 띄웁니다.
+      streamguardd --clear    hosts 파일의 차단 구간과 방화벽 차단을 모두 지웁니다.
+      streamguardd --status   지금 상태를 보여 줍니다.
     """)
 }
 
@@ -237,7 +237,7 @@ if arguments.contains("--help") || arguments.contains("-h") {
 }
 
 guard getuid() == 0 else {
-    FileHandle.standardError.write(Data("ytguardd 는 루트 권한으로 실행해야 합니다.\n".utf8))
+    FileHandle.standardError.write(Data("streamguardd 는 루트 권한으로 실행해야 합니다.\n".utf8))
     exit(1)
 }
 

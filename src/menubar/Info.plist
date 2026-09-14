@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>YouTubeGuard</string>
+    <string>StreamGuard</string>
     <key>CFBundleDisplayName</key>
-    <string>YouTubeGuard</string>
+    <string>StreamGuard</string>
     <key>CFBundleIdentifier</key>
-    <string>com.vincent.ytguard.menubar</string>
+    <string>io.github.binvincent29-netizen.streamguard.menubar</string>
     <key>CFBundleExecutable</key>
-    <string>YouTubeGuard</string>
+    <string>StreamGuard</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleVersion</key>
@@ -23,6 +23,6 @@
     <key>LSUIElement</key>
     <true/>
     <key>NSHumanReadableCopyright</key>
-    <string>YouTubeGuard</string>
+    <string>StreamGuard</string>
 </dict>
 </plist>

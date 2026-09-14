@@ -46,7 +46,7 @@ final class ScheduleEditor: NSObject, NSWindowDelegate {
             styleMask: [.titled, .closable],
             backing: .buffered,
             defer: false)
-        window.title = "YouTubeGuard · 차단 설정"
+        window.title = "StreamGuard · 차단 설정"
         window.delegate = self
         window.center()
         window.isReleasedWhenClosed = false
