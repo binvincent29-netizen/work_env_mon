@@ -1,4 +1,4 @@
-# YouTubeGuard
+# StreamGuard
 
 macOS 에서 정해진 시간에 YouTube, 넷플릭스, 디즈니+ 같은 사이트 접속을 막는
 프로그램입니다. 막을 서비스는 목록에서 고르고, 목록에 없는 곳은 주소를 직접
@@ -60,7 +60,7 @@ sudo ./uninstall.sh
 색이 제대로 나오는지 확인하려면 이렇게 합니다.
 
 ```bash
-/Applications/YouTubeGuard.app/Contents/MacOS/YouTubeGuard --icon-check
+/Applications/StreamGuard.app/Contents/MacOS/StreamGuard --icon-check
 ```
 
 아이콘 위에 마우스를 올리면 언제 풀리는지, 몇 개의 주소를 막고 있는지가
@@ -184,15 +184,15 @@ iCloud 비공개 릴레이를 켜 두면 사파리 통신이 애플 프록시를
 
 ## 파일이 놓이는 곳
 
-차단 데몬은 `/usr/local/libexec/ytguardd` 에, 메뉴 바 앱은
-`/Applications/YouTubeGuard.app` 에 놓입니다. 설정은
-`/Library/Application Support/YouTubeGuard/user/config.json` 이고, 현재 상태는
+차단 데몬은 `/usr/local/libexec/streamguardd` 에, 메뉴 바 앱은
+`/Applications/StreamGuard.app` 에 놓입니다. 설정은
+`/Library/Application Support/StreamGuard/user/config.json` 이고, 현재 상태는
 같은 폴더 위쪽의 `state.json` 에 데몬이 적습니다. 기록은
-`/Library/Logs/YouTubeGuard/daemon.log` 에 쌓이며 메뉴의 "기록 보기" 로 열 수
+`/Library/Logs/StreamGuard/daemon.log` 에 쌓이며 메뉴의 "기록 보기" 로 열 수
 있습니다.
 
-자동 실행 등록은 `/Library/LaunchDaemons/com.vincent.ytguard.daemon.plist` 와
-`/Library/LaunchAgents/com.vincent.ytguard.menubar.plist` 입니다.
+자동 실행 등록은 `/Library/LaunchDaemons/io.github.binvincent29-netizen.streamguard.daemon.plist` 와
+`/Library/LaunchAgents/io.github.binvincent29-netizen.streamguard.menubar.plist` 입니다.
 
 ## 문제가 생겼을 때
 
@@ -201,7 +201,7 @@ iCloud 비공개 릴레이를 켜 두면 사파리 통신이 애플 프록시를
 먼저 앱이 실제로 돌고 있는지 봅니다.
 
 ```bash
-pgrep -lf YouTubeGuard
+pgrep -lf StreamGuard
 ```
 
 프로세스가 있는데도 메뉴 바에 없다면 자리가 모자라 잘린 것입니다. 새로 붙는
@@ -210,14 +210,14 @@ pgrep -lf YouTubeGuard
 몇 개가 잘려 있는 경우가 많습니다.
 
 자리를 비워 주어야 합니다. Command 키를 누른 채로 아이콘을 옆으로 끌면 순서를
-바꿀 수 있고, 메뉴 바 밖으로 끌어내면 없앨 수 있습니다. YouTubeGuard 아이콘을
+바꿀 수 있고, 메뉴 바 밖으로 끌어내면 없앨 수 있습니다. StreamGuard 아이콘을
 오른쪽으로 옮겨 두면 잘리지 않고, 그 자리는 다음 실행에도 남습니다. 시스템
 설정의 제어 센터 항목에서 쓰지 않는 아이콘을 숨겨도 됩니다.
 
 외장 모니터를 쓰고 있다면 그쪽 메뉴 바에는 보일 수 있습니다. 화면마다 들어가는
 개수가 다르기 때문입니다.
 
-아이콘을 닫았거나 실수로 없앴다면 응용 프로그램 폴더의 YouTubeGuard 를 다시
+아이콘을 닫았거나 실수로 없앴다면 응용 프로그램 폴더의 StreamGuard 를 다시
 실행하면 됩니다. 아이콘이 없어도 차단 자체는 계속 동작합니다.
 
 ### 차단 시간인데 브라우저에서 YouTube 가 열린다
@@ -247,19 +247,19 @@ curl -s -o /dev/null -w "%{http_code}\n" --max-time 5 https://www.youtube.com
 지금 상태를 확인하려면 이렇게 합니다.
 
 ```bash
-sudo /usr/local/libexec/ytguardd --status
+sudo /usr/local/libexec/streamguardd --status
 ```
 
 차단이 어떤 이유로든 남아 있어 곤란하면 이 명령으로 곧바로 풉니다.
 
 ```bash
-sudo /usr/local/libexec/ytguardd --clear
+sudo /usr/local/libexec/streamguardd --clear
 ```
 
 데몬이 도는지 확인하려면 이렇게 합니다.
 
 ```bash
-sudo launchctl print system/com.vincent.ytguard.daemon | head -20
+sudo launchctl print system/io.github.binvincent29-netizen.streamguard.daemon | head -20
 ```
 ## 코드 구조
 
@@ -282,5 +282,5 @@ pf 방화벽 다루기, 그리고 3 초마다 도는 본체입니다.
 돌리므로 따로 실행할 필요는 없습니다.
 
 ```bash
-./build/ytguard-tests
+./build/streamguard-tests
 ```

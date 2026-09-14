@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# YouTubeGuard 를 빌드한다. 관리자 권한은 필요하지 않다.
+# StreamGuard 를 빌드한다. 관리자 권한은 필요하지 않다.
 # 결과물은 build/ 아래에 놓인다.
 #
 set -euo pipefail
@@ -10,28 +10,28 @@ cd "$(dirname "$0")"
 ARCH="$(uname -m)"
 TARGET="${ARCH}-apple-macos13.0"
 BUILD="build"
-APP="${BUILD}/YouTubeGuard.app"
+APP="${BUILD}/StreamGuard.app"
 
 echo "==> 이전 결과물을 지웁니다"
 rm -rf "$BUILD"
 mkdir -p "$BUILD"
 
 echo "==> 검사 프로그램을 빌드하고 돌립니다"
-swiftc -target "$TARGET" -o "${BUILD}/ytguard-tests" \
+swiftc -target "$TARGET" -o "${BUILD}/streamguard-tests" \
     src/shared/*.swift \
     src/daemon/HostsFile.swift \
     tests/main.swift
-"${BUILD}/ytguard-tests"
+"${BUILD}/streamguard-tests"
 
 echo
 echo "==> 차단 데몬을 빌드합니다"
-swiftc -O -target "$TARGET" -o "${BUILD}/ytguardd" \
+swiftc -O -target "$TARGET" -o "${BUILD}/streamguardd" \
     src/shared/*.swift \
     src/daemon/*.swift
 
 echo "==> 메뉴 바 앱을 빌드합니다"
 mkdir -p "${APP}/Contents/MacOS" "${APP}/Contents/Resources"
-swiftc -O -target "$TARGET" -o "${APP}/Contents/MacOS/YouTubeGuard" \
+swiftc -O -target "$TARGET" -o "${APP}/Contents/MacOS/StreamGuard" \
     src/shared/*.swift \
     src/icon/IconArt.swift \
     src/menubar/*.swift \
@@ -39,20 +39,20 @@ swiftc -O -target "$TARGET" -o "${APP}/Contents/MacOS/YouTubeGuard" \
 cp src/menubar/Info.plist "${APP}/Contents/Info.plist"
 
 echo "==> 앱 아이콘을 그립니다"
-swiftc -O -target "$TARGET" -o "${BUILD}/ytguard-makeicon" \
+swiftc -O -target "$TARGET" -o "${BUILD}/streamguard-makeicon" \
     src/icon/*.swift \
     -framework Cocoa
-"${BUILD}/ytguard-makeicon" "${BUILD}/AppIcon.iconset"
+"${BUILD}/streamguard-makeicon" "${BUILD}/AppIcon.iconset"
 iconutil -c icns "${BUILD}/AppIcon.iconset" -o "${APP}/Contents/Resources/AppIcon.icns"
 
 echo "==> 서명합니다"
 # 배포용 인증서 없이 이 기기에서만 쓰는 서명이다.
-codesign --force --sign - --timestamp=none "${BUILD}/ytguardd"
+codesign --force --sign - --timestamp=none "${BUILD}/streamguardd"
 codesign --force --sign - --timestamp=none "${APP}"
 
 echo
 echo "빌드가 끝났습니다."
-echo "  데몬        ${BUILD}/ytguardd"
+echo "  데몬        ${BUILD}/streamguardd"
 echo "  메뉴 바 앱  ${APP}"
 echo
 echo "설치하려면 sudo ./install.sh 를 실행하세요."

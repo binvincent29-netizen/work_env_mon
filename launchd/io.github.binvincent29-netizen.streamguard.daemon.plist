@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.vincent.ytguard.daemon</string>
+    <string>io.github.binvincent29-netizen.streamguard.daemon</string>
 
     <key>ProgramArguments</key>
     <array>
-        <string>/usr/local/libexec/ytguardd</string>
+        <string>/usr/local/libexec/streamguardd</string>
     </array>
 
     <!-- 부팅하자마자 뜨고, 어떤 이유로 멈추더라도 다시 띄운다. -->
@@ -22,6 +22,6 @@
     <string>Background</string>
 
     <key>StandardErrorPath</key>
-    <string>/Library/Logs/YouTubeGuard/daemon.err.log</string>
+    <string>/Library/Logs/StreamGuard/daemon.err.log</string>
 </dict>
 </plist>
