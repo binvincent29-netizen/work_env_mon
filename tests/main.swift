@@ -610,6 +610,97 @@ do {
     check(false, "예전 설정을 읽지 못했습니다: \(error)")
 }
 
+
+// MARK: 상태 파일에 적히는 값
+
+section("상태 파일에 적히는 값")
+
+do {
+    // 실제로 겪은 상황이다. 금요일 16:38 에 "오늘 하루" 로 껐고,
+    // 기한은 토요일 자정이었다. 일요일 아침에도 아이콘이 꺼짐으로 보였다.
+    var off = Config.default
+    off.rules = [weekdayRule]
+    off.enabled = false
+    off.disabledUntil = date(2026, 9, 26, 0, 0)
+
+    let sunday = date(2026, 9, 27, 10, 22)
+    let state = BlockState.make(config: off, now: sunday,
+                                hostsApplied: false, pfApplied: false,
+                                blockedHostCount: 0, lastError: nil)
+
+    check(state.enabled, "기한이 지났으면 상태에도 켜짐으로 적힌다")
+    check(!state.blocking, "일요일이라 막지는 않는다")
+    equal(state.reason, .idle, "이유는 스케줄 밖")
+    equal(state.nextChange, date(2026, 9, 28, 9, 0), "다음 차단은 월요일 9시")
+}
+
+do {
+    // 기한이 남아 있는 동안에는 꺼짐으로 적혀야 한다
+    var off = Config.default
+    off.rules = [weekdayRule]
+    off.enabled = false
+    off.disabledUntil = date(2026, 9, 26, 0, 0)
+
+    let state = BlockState.make(config: off, now: date(2026, 9, 25, 20, 0),
+                                hostsApplied: false, pfApplied: false,
+                                blockedHostCount: 0, lastError: nil)
+    check(!state.enabled, "기한이 남았으면 꺼짐으로 적힌다")
+    equal(state.reason, .disabled, "이유는 전체 꺼짐")
+    equal(state.activeUntil, date(2026, 9, 26, 0, 0), "언제 돌아오는지 함께 적힌다")
+}
+
+do {
+    // 기한 없이 끈 경우는 계속 꺼짐이다
+    var off = Config.default
+    off.rules = [weekdayRule]
+    off.enabled = false
+    off.disabledUntil = nil
+
+    let state = BlockState.make(config: off, now: date(2026, 9, 28, 10, 0),
+                                hostsApplied: false, pfApplied: false,
+                                blockedHostCount: 0, lastError: nil)
+    check(!state.enabled, "기한 없이 끄면 계속 꺼짐으로 적힌다")
+    equal(state.reason, .disabled, "이유는 전체 꺼짐")
+}
+
+do {
+    // 차단 중일 때 적히는 값
+    var on = Config.default
+    on.rules = [weekdayRule]
+    let state = BlockState.make(config: on, now: date(2026, 9, 28, 10, 0),
+                                hostsApplied: true, pfApplied: false,
+                                blockedHostCount: 41, lastError: nil)
+    check(state.enabled && state.blocking, "차단 중에는 켜짐과 막는 중이 함께 적힌다")
+    equal(state.reason, .schedule, "이유는 스케줄")
+    equal(state.blockedHostCount, 41, "막는 주소 개수가 그대로 적힌다")
+    equal(state.heartbeat, date(2026, 9, 28, 10, 0), "판단한 시각이 적힌다")
+}
+
+do {
+    // 상태에 적힌 값끼리 서로 어긋나지 않아야 한다.
+    // 꺼짐으로 적혔는데 이유가 전체 꺼짐이 아니면 아이콘과 메뉴가 거짓을 말한다.
+    var cases: [Config] = []
+    for enabled in [true, false] {
+        for expiry in [nil, date(2026, 9, 26, 0, 0), date(2026, 10, 30, 0, 0)] as [Date?] {
+            var c = Config.default
+            c.rules = [weekdayRule]
+            c.enabled = enabled
+            c.disabledUntil = expiry
+            cases.append(c)
+        }
+    }
+    var mismatches = 0
+    for c in cases {
+        for moment in [date(2026, 9, 25, 20, 0), date(2026, 9, 27, 10, 22), date(2026, 9, 28, 10, 0)] {
+            let s = BlockState.make(config: c, now: moment, hostsApplied: false,
+                                    pfApplied: false, blockedHostCount: 0, lastError: nil)
+            if (s.reason == .disabled) != (s.enabled == false) { mismatches += 1 }
+            if s.blocking && !s.enabled { mismatches += 1 }
+        }
+    }
+    equal(mismatches, 0, "어떤 조합에서도 켜짐 여부와 이유가 어긋나지 않는다")
+}
+
 // MARK: 마무리
 
 print("\n검사 \(checks) 개 가운데 \(failures) 개 실패")
