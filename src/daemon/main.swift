@@ -103,18 +103,13 @@ final class Daemon {
 
         updatePacketFilter(config: config, blocking: decision.blocking, now: now)
 
-        let state = BlockState(
-            blocking: decision.blocking,
-            enabled: config.enabled,
-            reason: decision.reason,
-            activeUntil: decision.until,
-            nextChange: decision.nextChange,
-            heartbeat: now,
+        let state = BlockState.make(
+            config: config,
+            now: now,
             hostsApplied: decision.blocking && errorMessage == nil,
             pfApplied: pfBlocking,
             blockedHostCount: hostnames?.count ?? 0,
-            lastError: errorMessage
-        )
+            lastError: errorMessage)
         writeStateIfNeeded(state, now: now)
     }
 
