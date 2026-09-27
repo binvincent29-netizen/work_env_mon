@@ -314,12 +314,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func openLog() {
-        guard FileManager.default.fileExists(atPath: Paths.logFile) else {
-            Dialogs.info(title: "기록이 아직 없습니다",
-                         message: "데몬이 처음 움직이고 나면 \(Paths.logFile) 에 쌓입니다.")
+        if FileManager.default.isReadableFile(atPath: Paths.logFile) {
+            NSWorkspace.shared.open(URL(fileURLWithPath: Paths.logFile))
             return
         }
-        NSWorkspace.shared.open(URL(fileURLWithPath: Paths.logFile))
+
+        // 폴더에 들어갈 권한이 없으면 파일이 있어도 없는 것처럼 보인다.
+        // 없다고 말해 버리면 원인을 찾을 수 없으므로 갈라서 알려 준다.
+        if FileManager.default.fileExists(atPath: Paths.logDir),
+           !FilePermissions.isSearchableByEveryone(Paths.logDir) {
+            Dialogs.error(
+                title: "기록을 열 권한이 없습니다",
+                message: """
+                기록은 있지만 \(Paths.logDir) 폴더에 들어갈 권한이 없습니다.
+                차단 데몬을 다시 띄우면 저절로 고쳐집니다. 지금 바로 고치려면
+                터미널에서 아래를 실행하세요.
+
+                sudo chmod 755 "\(Paths.logDir)"
+                """)
+            return
+        }
+
+        Dialogs.info(title: "기록이 아직 없습니다",
+                     message: "데몬이 처음 움직이고 나면 \(Paths.logFile) 에 쌓입니다.")
     }
 
     @objc private func quitApp() {
