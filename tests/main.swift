@@ -611,6 +611,44 @@ do {
 }
 
 
+// MARK: 폴더와 파일 권한
+
+section("폴더와 파일 권한")
+
+do {
+    let base = NSTemporaryDirectory() + "streamguard-perm-\(getpid())"
+    defer { try? FileManager.default.removeItem(atPath: base) }
+
+    // 없던 폴더를 만들면 뜻한 권한이 붙어야 한다
+    check(FilePermissions.ensureDirectory(base, mode: 0o755), "없던 폴더를 만든다")
+    equal(FilePermissions.mode(of: base), 0o755, "새로 만든 폴더의 권한")
+
+    // macOS 를 올리면서 겪은 상황이다. 폴더가 744 로 다시 만들어졌다.
+    try FileManager.default.setAttributes([.posixPermissions: 0o744], ofItemAtPath: base)
+    equal(FilePermissions.mode(of: base), 0o744, "권한이 좁아진 상태를 만든다")
+    check(!FilePermissions.isSearchableByEveryone(base), "744 는 남들이 들어갈 수 없다")
+
+    // 이미 있는 폴더도 맞춰 주어야 한다. 만들 때 주는 권한만으로는 부족하다.
+    check(FilePermissions.ensureDirectory(base, mode: 0o755), "이미 있는 폴더의 권한을 맞춘다")
+    equal(FilePermissions.mode(of: base), 0o755, "좁아졌던 권한이 되돌아온다")
+    check(FilePermissions.isSearchableByEveryone(base), "755 는 남들이 들어갈 수 있다")
+
+    // 파일도 같다
+    let file = base + "/daemon.log"
+    check(!FilePermissions.ensureFile(file, mode: 0o644), "없는 파일에는 아무 일도 하지 않는다")
+    try "한 줄\n".write(toFile: file, atomically: true, encoding: .utf8)
+    try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: file)
+    check(FilePermissions.ensureFile(file, mode: 0o644), "있는 파일의 권한을 맞춘다")
+    equal(FilePermissions.mode(of: file), 0o644, "파일 권한이 맞춰진다")
+} catch {
+    check(false, "권한 검사 도중 실패했습니다: \(error)")
+}
+
+do {
+    check(FilePermissions.mode(of: "/없는/경로") == nil, "없는 경로의 권한은 알 수 없다")
+    check(!FilePermissions.isSearchableByEveryone("/없는/경로"), "없는 경로는 들어갈 수 없는 것으로 본다")
+}
+
 // MARK: 상태 파일에 적히는 값
 
 section("상태 파일에 적히는 값")

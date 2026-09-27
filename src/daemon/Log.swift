@@ -11,8 +11,8 @@ final class Log {
     private init() {
         formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        try? FileManager.default.createDirectory(atPath: Paths.logDir,
-                                                 withIntermediateDirectories: true)
+        // 폴더에 실행 권한이 없으면 사용자가 기록을 열 수 없다.
+        FilePermissions.ensureDirectory(Paths.logDir, mode: 0o755)
     }
 
     func write(_ message: String) {
@@ -27,6 +27,7 @@ final class Log {
                 try? handle.close()
             } else {
                 try? line.write(to: url, atomically: true, encoding: .utf8)
+                FilePermissions.ensureFile(Paths.logFile, mode: 0o644)
             }
             self.trimIfNeeded(url)
         }
@@ -39,6 +40,8 @@ final class Log {
         let lines = text.components(separatedBy: "\n")
         let kept = lines.suffix(lines.count / 2).joined(separator: "\n")
         try? kept.write(to: url, atomically: true, encoding: .utf8)
+        // 통째로 바꿔 쓰면 새 파일이 되므로 권한을 다시 맞춘다.
+        FilePermissions.ensureFile(Paths.logFile, mode: 0o644)
     }
 }
 
