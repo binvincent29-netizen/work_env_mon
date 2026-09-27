@@ -24,23 +24,25 @@ final class Daemon {
 
     private func prepareFilesystem() {
         let fm = FileManager.default
-        try? fm.createDirectory(atPath: Paths.supportDir, withIntermediateDirectories: true,
-                                attributes: [.posixPermissions: 0o755])
+
+        // 폴더가 이미 있으면 만들 때 준 권한이 적용되지 않고, 새로 만들 때는
+        // umask 에 깎인다. macOS 를 올리면서 기록 폴더가 744 로 다시 만들어져
+        // 사용자가 기록을 열지 못한 일이 있었다. 그래서 켤 때마다 맞춘다.
+        FilePermissions.ensureDirectory(Paths.supportDir, mode: 0o755)
+        FilePermissions.ensureDirectory(Paths.logDir, mode: 0o755)
+
         // 설정 폴더만 admin 그룹이 쓸 수 있게 둔다. 그래야 메뉴 바 앱이
         // 관리자 비밀번호 없이 설정을 바꿀 수 있다. (80 번이 admin 그룹)
-        try? fm.createDirectory(atPath: Paths.userConfigDir, withIntermediateDirectories: true)
-        try? fm.setAttributes([.posixPermissions: 0o775, .groupOwnerAccountID: 80],
-                              ofItemAtPath: Paths.userConfigDir)
-        try? fm.createDirectory(atPath: Paths.logDir, withIntermediateDirectories: true)
+        FilePermissions.ensureDirectory(Paths.userConfigDir, mode: 0o775, group: 80)
 
         if !fm.fileExists(atPath: Paths.configFile) {
             var config = Config.default
             config.updatedAt = Date()
             try? JSONStore.save(config, to: Paths.configFile)
-            try? fm.setAttributes([.posixPermissions: 0o664, .groupOwnerAccountID: 80],
-                                  ofItemAtPath: Paths.configFile)
             log("기본 설정 파일을 만들었습니다: \(Paths.configFile)")
         }
+        FilePermissions.ensureFile(Paths.configFile, mode: 0o664, group: 80)
+        FilePermissions.ensureFile(Paths.stateFile, mode: 0o644)
     }
 
     private func installSignalHandlers() {
