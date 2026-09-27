@@ -189,6 +189,34 @@ struct BlockState: Codable, Equatable {
     var lastError: String?
 }
 
+
+extension BlockState {
+    /// 설정과 지금 시각으로 상태를 만든다.
+    ///
+    /// 전체 스위치 자리에는 설정 파일에 적힌 값이 아니라 지금 시점의 실제 값을 담는다.
+    /// 기한이 지나 저절로 켜진 것을 꺼짐으로 적으면, 막을 준비가 되어 있는데도
+    /// 아이콘과 메뉴는 꺼져 있다고 말하게 된다.
+    static func make(config: Config,
+                     now: Date,
+                     hostsApplied: Bool,
+                     pfApplied: Bool,
+                     blockedHostCount: Int,
+                     lastError: String?) -> BlockState {
+        let decision = Schedule.decide(config: config, now: now)
+        return BlockState(
+            blocking: decision.blocking,
+            enabled: config.isEnabled(at: now),
+            reason: decision.reason,
+            activeUntil: decision.until,
+            nextChange: decision.nextChange,
+            heartbeat: now,
+            hostsApplied: hostsApplied,
+            pfApplied: pfApplied,
+            blockedHostCount: blockedHostCount,
+            lastError: lastError)
+    }
+}
+
 // MARK: - JSON 읽고 쓰기
 
 enum JSONStore {
